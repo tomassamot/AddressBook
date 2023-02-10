@@ -18,11 +18,11 @@ int main(void)
     if(address_book == NULL){
         printf("Warning: failed to initialize address book.\n");
     }
-    start_ui();
+    start_ui(&address_book);
     return 0;
 }
 
-void init_addresses( struct Node **address_book)
+void init_addresses(struct Node **address_book)
 {
     char *home_path = getenv("HOME");
     char address_file_name[] = "/addresses.csv";
