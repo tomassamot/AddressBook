@@ -1,28 +1,25 @@
+#include "ui.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "fileoperations.c"
-#include "linkedlist.c"
+#include "linkedlist.h"
 
 
-#define DELIMITER ","
 
-int start_ui(char **given_address_path);
 static void clear_stdin();
 static void process_input(int input);
-static void process_get_type_input(int input, char *address_path);
-static void process_get_by_index_input(int input, char *address_path);
-static void process_get_by_field_input(int input, char *address_path);
-static void process_add_type_input(int input, char *address_path);
-static struct Node* create_node(char input[]);
-static void process_delete_type_input(int input, char *address_path);
+static void process_get_type_input(int input);
+static void process_get_by_index_input(int input);
+static void process_get_by_field_input(int input);
+static void process_add_type_input(int input);
+static void process_delete_type_input(int input);
 
-char **address_path = NULL;
+struct Node **address_book = NULL;
 
-int start_ui(char **given_address_path)
+void start_ui(struct Node **given_address_book)
 {
-    address_path = given_address_path;
+    address_book = given_address_book;
     int input = -1;
     
     while(input != 0){
@@ -65,7 +62,7 @@ static void process_input(int input)
                 return;
             }
             clear_stdin();
-            process_get_type_input(new_input, *address_path);
+            process_get_type_input(new_input);
             break;
         case 2:
             printf("What would you like to do next?\n");
@@ -76,7 +73,7 @@ static void process_input(int input)
                 return;
             }
             clear_stdin();
-            process_add_type_input(new_input, *address_path);
+            process_add_type_input(new_input);
             break;
         case 3:
             printf("What would you like to do next?\n");
@@ -87,14 +84,14 @@ static void process_input(int input)
                 return;
             }
             clear_stdin();
-            process_delete_type_input(new_input, *address_path);
+            process_delete_type_input(new_input);
             break;
         default:
             printf("Couldn't understand given input. Try again.\n");
             break;
     }
 }
-static void process_get_type_input(int input, char *address_path)
+static void process_get_type_input(int input)
 {
     int new_input;
 
@@ -103,7 +100,7 @@ static void process_get_type_input(int input, char *address_path)
             printf("Cancelling...\n");
             break;
         case 1:
-            print_all(address_path);
+            print_all(address_book);
             break;
         case 2:
             printf("Type in index in address book:\n");
@@ -113,7 +110,7 @@ static void process_get_type_input(int input, char *address_path)
                 return;
             }
             clear_stdin();
-            process_get_by_index_input(new_input, address_path);
+            process_get_by_index_input(new_input);
             break;
         case 3:
             printf("By what information would you like to search?\n");
@@ -124,23 +121,23 @@ static void process_get_type_input(int input, char *address_path)
                 return;
             }
             clear_stdin();
-            process_get_by_field_input(new_input, address_path);
+            process_get_by_field_input(new_input);
             break;
         default:
             printf("Couldn't understand given input. Cancelling...\n");
             break;
     }
 }
-static void process_get_by_index_input(int input, char *address_path)
+static void process_get_by_index_input(int input)
 {
     if(input < 0){
         printf("Index can't be negative. Cancelling...\n");
         return;
     }
 
-    print_by_index(address_path, input);
+    print_by_index(address_book, input);
 }
-static void process_get_by_field_input(int input, char *address_path)
+static void process_get_by_field_input(int input)
 {
     char buffer[30];
 
@@ -157,9 +154,9 @@ static void process_get_by_field_input(int input, char *address_path)
     scanf("%29[^\n]", buffer);
     clear_stdin();
 
-    print_by_field(address_path, input, buffer);
+    print_by_field(address_book, input, buffer);
 }
-static void process_add_type_input(int input, char *address_path)
+static void process_add_type_input(int input)
 {
     int new_input;
     char buffer[100];
@@ -174,13 +171,12 @@ static void process_add_type_input(int input, char *address_path)
             printf("Type in the name, surname, email and phone number, seperating each by one comma (f.e.: “Peter,Peterson,p.peterson@gmail.com,865792146”)\n");
             scanf("%99[^\n]", buffer);
             clear_stdin();
-            new_node = create_node(buffer);
+            new_node = create_node_csv(buffer);
             //ret = add_to_end(full_path, new_node);
-            ret = file_add_to_end(address_path, new_node);
+            ret = add_to_end(address_book, new_node);
             if(ret == 0){
                 printf("Added address to end successfully.\n");
             }
-            free(new_node);
             break;
         case 2:
             printf("Type in index where you would like to insert new address:\n");
@@ -195,11 +191,11 @@ static void process_add_type_input(int input, char *address_path)
             scanf("%99[^\n]", buffer);
             clear_stdin();
 
-            new_node = create_node(buffer);
+            new_node = create_node_csv(buffer);
             if(new_node == NULL){
                 return;
             }
-            ret = file_insert(address_path, new_node, new_input);
+            ret = insert(address_book, new_node, new_input);
             if(ret == 0){
                 printf("Inserted address into given position successfully.\n");
             }
@@ -212,39 +208,7 @@ static void process_add_type_input(int input, char *address_path)
             break;
     }
 }
-static struct Node* create_node(char input[])
-{
-    char *token = strtok(input, DELIMITER);
-    struct Node *new_node = NULL;
-    new_node = (struct Node*) malloc(sizeof(struct Node));
-
-    for(int i = 0;i<4;i++){
-        if(token == NULL){
-            printf("Couldn't process given input. Cancelling...\n");
-            return NULL;
-        }
-        switch(i){
-            case 0:
-                strcpy(new_node->name, token);
-                break;
-            case 1:
-                strcpy(new_node->surname, token);
-                break;
-            case 2:
-                strcpy(new_node->email, token);
-                break;
-            case 3:
-                strcpy(new_node->phone, token);
-                break;
-            default:
-                printf("Unexpected switch case.\n");
-                break;
-            }
-        token = strtok(NULL, DELIMITER);
-    }
-    return new_node;
-}
-static void process_delete_type_input(int input, char *address_path)
+static void process_delete_type_input(int input)
 {
     int new_input;
     int ret;
@@ -264,13 +228,13 @@ static void process_delete_type_input(int input, char *address_path)
             if(new_input < 0){
                 printf("Couldn't understand given input. Cancelling...\n");
             }
-            ret = file_delete_by_index(address_path, new_input);
+            ret = delete_by_index(address_book, new_input);
             if(ret == 0){
                 printf("Address deleted successfully.\n");
             }
             break;
         case 2:
-            ret = file_delete_all(address_path);
+            ret = delete_all(address_book);
             if(ret == 0){
                 printf("All addresses deleted successfully.\n");
             }

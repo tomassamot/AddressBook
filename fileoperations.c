@@ -1,3 +1,11 @@
+
+/*
+*
+* Used earlier to do linkedlist style operatinos on a text file
+*
+*/
+
+
 #include <stdio.h>
 #include "linkedlist.c"
 
@@ -247,3 +255,4 @@ void deallocate_address_book(struct Node **address_book)
         current_node = tmp;
     }
 }
+
