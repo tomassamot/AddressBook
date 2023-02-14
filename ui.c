@@ -3,10 +3,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 #include "linkedlist.h"
 
 
 
+static void handle_interrupt(int signum);
 static void clear_stdin();
 static void process_input(int input);
 static void process_get_type_input(int input);
@@ -15,14 +17,19 @@ static void process_get_by_field_input(int input);
 static void process_add_type_input(int input);
 static void process_delete_type_input(int input);
 
-struct Node **address_book = NULL;
+struct Node *address_book = NULL;
+int input = -1;
+int interruption = -1;
 
 void start_ui(struct Node **given_address_book)
 {
-    address_book = given_address_book;
-    int input = -1;
+    address_book = *given_address_book;
     
-    while(input != 0){
+
+
+    signal(SIGINT, handle_interrupt);
+    
+    while(input != 0 && interruption != 0){
         printf("What would you like to do?\n");
         printf("0 – Exit, 1 – Get address / addresses, 2 – Add address, 3 – Delete address / addresses\n");
 
@@ -38,6 +45,14 @@ void start_ui(struct Node **given_address_book)
             perror("Error detected: ");
         }
     }
+}
+static void handle_interrupt(int signum)
+{
+    printf("Interruption detected. Write in random input and click enter to finish program.\n");
+    interruption = 0;
+    /*deallocate_address_book(address_book);
+    signal(SIGINT, SIG_DFL);
+    raise(SIGINT);*/
 }
 static void clear_stdin()
 {
@@ -100,7 +115,7 @@ static void process_get_type_input(int input)
             printf("Cancelling...\n");
             break;
         case 1:
-            print_all(address_book);
+            print_all(&address_book);
             break;
         case 2:
             printf("Type in index in address book:\n");
@@ -135,7 +150,7 @@ static void process_get_by_index_input(int input)
         return;
     }
 
-    print_by_index(address_book, input);
+    print_by_index(&address_book, input);
 }
 static void process_get_by_field_input(int input)
 {
@@ -154,7 +169,7 @@ static void process_get_by_field_input(int input)
     scanf("%29[^\n]", buffer);
     clear_stdin();
 
-    print_by_field(address_book, input, buffer);
+    print_by_field(&address_book, input, buffer);
 }
 static void process_add_type_input(int input)
 {
@@ -172,8 +187,7 @@ static void process_add_type_input(int input)
             scanf("%99[^\n]", buffer);
             clear_stdin();
             new_node = create_node_csv(buffer);
-            //ret = add_to_end(full_path, new_node);
-            ret = add_to_end(address_book, new_node);
+            ret = add_to_end(&address_book, new_node);
             if(ret == 0){
                 printf("Added address to end successfully.\n");
             }
@@ -195,7 +209,7 @@ static void process_add_type_input(int input)
             if(new_node == NULL){
                 return;
             }
-            ret = insert(address_book, new_node, new_input);
+            ret = insert(&address_book, new_node, new_input);
             if(ret == 0){
                 printf("Inserted address into given position successfully.\n");
             }
@@ -228,13 +242,13 @@ static void process_delete_type_input(int input)
             if(new_input < 0){
                 printf("Couldn't understand given input. Cancelling...\n");
             }
-            ret = delete_by_index(address_book, new_input);
+            ret = delete_by_index(&address_book, new_input);
             if(ret == 0){
                 printf("Address deleted successfully.\n");
             }
             break;
         case 2:
-            ret = delete_all(address_book);
+            ret = delete_all(&address_book);
             if(ret == 0){
                 printf("All addresses deleted successfully.\n");
             }

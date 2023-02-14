@@ -7,8 +7,10 @@
 
 #define DELIMITER ","
 
+static void handle_interrupt(int signum);
 static int get_size(const char *ptr);
 static void read_addresses_file(struct Node **address_book, char *full_path);
+
 
 int main(void)
 {
@@ -26,12 +28,11 @@ int main(void)
     strcat(full_path, address_file_name);
 
     read_addresses_file(&address_book, full_path);
-
-    
+    free(full_path);
     
     start_ui(&address_book);
 
-    free(full_path);
+    
     deallocate_address_book(&address_book);
     return 0;
 }
