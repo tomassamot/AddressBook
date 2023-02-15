@@ -4,7 +4,7 @@
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
-#include "linkedlist.h"
+#include "../lib/linkedlist.h"
 
 
 
@@ -25,8 +25,6 @@ void start_ui(struct Node **given_address_book)
 {
     address_book = *given_address_book;
     
-
-
     signal(SIGINT, handle_interrupt);
     
     while(input != 0 && interruption != 0){
@@ -50,9 +48,6 @@ static void handle_interrupt(int signum)
 {
     printf("Interruption detected. Write in random input and click enter to finish program.\n");
     interruption = 0;
-    /*deallocate_address_book(address_book);
-    signal(SIGINT, SIG_DFL);
-    raise(SIGINT);*/
 }
 static void clear_stdin()
 {

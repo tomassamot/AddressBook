@@ -3,11 +3,10 @@
 #include <string.h>
 #include <errno.h>
 #include "ui.h"
-#include "linkedlist.h"
+#include "../lib/linkedlist.h"
 
 #define DELIMITER ","
 
-static void handle_interrupt(int signum);
 static int get_size(const char *ptr);
 static void read_addresses_file(struct Node **address_book, char *full_path);
 
