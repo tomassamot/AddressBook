@@ -1,19 +1,18 @@
 CC = gcc
 CPPFLAGS = 
 CFLAGS = 
+LDFLAGS =
+RM = rm -f
 
-LDFLAGS=
-
-empty=
 c_files := $(wildcard *.c)
 o_files := $(foreach c_file,$(c_files),$(subst .c,.o,$(c_file)))
 
-
-
-all: build_exe
-build_exe: build_o_files $(o_files)
-	$(CC) -o program $(LDFLAGS) $(foreach o_file,$(o_files),$(o_file) )
-build_o_files: $(c_files)
-	$(foreach c_file,$(c_files), $(CC) -c $(CPPFLAGS) $(c_file) -o $(subst .c,.o,$(c_file);))
+.PHONY: all
+all: create
+create: $(o_files)
+	$(CC) -o program $(LDFLAGS) $^
+$(o_files): $(c_files)
+	$(CC) -c $(subst .o,.c,$@) $(CPPFLAGS) $@
+.PHONY: clean
 clean:
-	rm -f program $(foreach file,$(c_files), $(subst .c,.o,$(file)))
+	$(RM) program $(o_files)
