@@ -1,18 +1,15 @@
-CC = gcc
-CPPFLAGS = 
-CFLAGS = 
-LDFLAGS =
-RM = rm -f
+CPPFLAGS:= 
+CFLAGS:= 
+LDFLAGS:=
+BIN:=address_book
+SRCS:=$(wildcard *.c)
+OBJS:=$(SRCS:.c=.o)
 
-c_files := $(wildcard *.c)
-o_files := $(foreach c_file,$(c_files),$(subst .c,.o,$(c_file)))
+.PHONY: all clean
+all: $(BIN)
 
-.PHONY: all
-all: create
-create: $(o_files)
-	$(CC) -o program $(LDFLAGS) $^
-$(o_files): $(c_files)
-	$(CC) -c $(subst .o,.c,$@) $(CPPFLAGS) $@
-.PHONY: clean
+$(BIN): $(OBJS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS)
+
 clean:
-	$(RM) program $(o_files)
+	$(RM) $(BIN) $(OBJS)
