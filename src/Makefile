@@ -1,8 +1,8 @@
-CPPFLAGS:= -Wall
-CFLAGS:= -L../lib
-LDFLAGS:= -llinkedlist
+CPPFLAGS:= -I../lib
+CFLAGS:= -Wall
+LDFLAGS:= -L../lib -llinkedlist
 
-BIN:=main
+BIN:=address_book
 SRCS:=$(wildcard *.c)
 OBJS:=$(SRCS:.c=.o)
 
@@ -11,5 +11,6 @@ all: $(BIN)
 
 $(BIN): $(OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS)
+
 clean:
 	$(RM) $(BIN) $(OBJS)

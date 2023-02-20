@@ -5,10 +5,6 @@
 
 #define DELIMITER ","
 
-#ifndef LINKEDLIST_C
-#define LINKEDLIST_C
-
-
 struct Node* create_node(char name[20], char surname[20], char email[30], char phone[20])
 {
     struct Node *new_node = NULL;
@@ -211,4 +207,3 @@ void deallocate_address_book(struct Node **address_book)
         current_node = tmp;
     }
 }
-#endif

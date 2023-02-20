@@ -1,6 +1,6 @@
-CPPFLAGS:= -Wall -Werror -fPIC
-CFLAGS:= -shared
-LDFLAGS:=
+CPPFLAGS:=
+CFLAGS:= -Wall -Werror -fPIC
+LDFLAGS:= -shared
 
 BIN:=liblinkedlist.so
 SRCS:=$(wildcard *.c)
@@ -11,5 +11,6 @@ all: $(BIN)
 
 $(BIN): $(OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS)
+	
 clean:
 	$(RM) $(BIN) $(OBJS)
